@@ -12,12 +12,13 @@
 </p>
 
 <p align="center">
-  <img src="assets/shingan_equity_curve.png" alt="Shingan 2021-2025 equity curve, 44 tickers Top5, Sharpe 1.21" width="1000" />
+  <a href="assets/shingan_equity_curve.png"><img src="assets/shingan_equity_curve.png" alt="Figure 1 — Shingan equity curve 2021-2025, 44 tickers Top5, Sharpe 1.21" width="1000" /></a>
+  <br/><sub><strong>Figure 1</strong> — Equity Curve (2021-2025, 44-ticker portfolio, Top-5 RVOL) — Shingan 5m/2R/1.5 Sharpe 1.21 · <a href="SHINGAN_Hybrid_ORB_Paper.md">Paper §6.2</a></sub>
 </p>
 
 > *Anything added dilutes everything else.* — tw93 &nbsp;&nbsp; *Perfection when nothing left to take away.* — Saint-Exupéry
 
-Shingan is the hybrid that survives where hourly fade dies. Formerly `hourly-liquidity-lab`, the pure hourly sweep (2011-2026, 5m) loses **24% to 99% every hour, Sharpe -0.29 to -2.39, PF 0.94** — archived to `models/legacy/` for audit only. See `INCIDENT_REPORT.md` and `reports/24_hour_cycle_findings.md`.
+Shingan is the hybrid that survives where hourly fade dies. Formerly `hourly-liquidity-lab`, the pure hourly sweep (2011-2026, 5m) loses **24% to 99% every hour, Sharpe -0.29 to -2.39, PF 0.94** — archived to [`models/legacy/`](models/legacy/) for audit only. See [`INCIDENT_REPORT.md`](INCIDENT_REPORT.md) and [`reports/24_hour_cycle_findings.md`](reports/24_hour_cycle_findings.md).
 
 ---
 
@@ -30,12 +31,20 @@ Shingan is the hybrid that survives where hourly fade dies. Formerly `hourly-liq
 | Zarattini naive 5m no filter | 6275 · +220% | 1260 · +70% | 0.37 | 1.04 | 60.1% |
 | SPY naive 15m (control) | -95% | — | -2.14 | — | — |
 
-Filters are the edge: no RVOL → Sharpe 0.37 vs 1.21, DD 60% vs 16.8% (`SHINGAN_Hybrid_ORB_Paper.md:186`). Full walk-forward in [`SHINGAN_Hybrid_ORB_Paper.md`](SHINGAN_Hybrid_ORB_Paper.md) and [`SHINGAN_ArXiv_Paper.pdf`](SHINGAN_ArXiv_Paper.pdf).
+Filters are the edge: no RVOL → Sharpe 0.37 vs 1.21, DD 60% vs 16.8% ([`SHINGAN_Hybrid_ORB_Paper.md:186`](SHINGAN_Hybrid_ORB_Paper.md#L186)). Full walk-forward in [`SHINGAN_Hybrid_ORB_Paper.md`](SHINGAN_Hybrid_ORB_Paper.md) and [`SHINGAN_ArXiv_Paper.pdf`](SHINGAN_ArXiv_Paper.pdf).
 
-<p align="center">
-  <img src="assets/shingan_heatmap.png" alt="OR×Target×RVOL heatmap" width="49%" />
-  <img src="assets/shingan_drawdown.png" alt="Drawdown" width="49%" />
-</p>
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td width="50%" align="center" valign="top">
+  <a href="assets/shingan_heatmap.png"><img src="assets/shingan_heatmap.png" alt="Figure 3 — Hybrid Parameter Heatmap: OR × TargetR × RVOL (2024, phi [0.6,2.0], Top5, 44 tickers) — 5m/2R/1.5 peak" width="100%" /></a>
+  <br/><sub><strong>Figure 3</strong> — Heatmap: OR × TargetR × RVOL (2024, φ[0.6,2.0], Top5, 44 tickers) — 5m/2R/1.5 peak 2.69</sub>
+</td>
+<td width="50%" align="center" valign="top">
+  <a href="assets/shingan_drawdown.png"><img src="assets/shingan_drawdown.png" alt="Figure 2 — Drawdown Comparison: Hybrid vs Parents (2021-2025, 44-ticker, Top-5 RVOL)" width="100%" /></a>
+  <br/><sub><strong>Figure 2</strong> — Drawdown: Hybrid 16.8% vs Valkyrie 15.8% vs Naive 60.1%</sub>
+</td>
+</tr>
+</table>
 
 ---
 
@@ -70,7 +79,8 @@ python3 -m unittest discover tests -v
 ```
 
 <p align="center">
-  <img src="assets/shingan_monthly.png" alt="Monthly returns" width="1000" />
+  <a href="assets/shingan_monthly.png"><img src="assets/shingan_monthly.png" alt="Figure 4 — Monthly returns, 1 trade/day across 44 names, β 0.05 to SPY" width="1000" /></a>
+  <br/><sub><strong>Figure 4</strong> — Monthly Returns — 1 trade/day across 44 names, β 0.05 to SPY, true intraday alpha</sub>
 </p>
 
 ## Architecture
@@ -100,7 +110,7 @@ shingan/
 - **Bracket** entry stop `high+tick` / `low-tick` — one `tick = 0.01`
 - **Exits** `tp = entry ± target_r·risk` (2R), BE when `high ≥ entry+risk` or `low ≤ entry-risk`, profit lock at 900 min if unreal ≥1%
 
-Why not hourly fade: tight $0.30 SL → 1,600 shares on $500 risk → $75 fee (18% of risk) → 2,700 trades → -$240k. Only the formal `Backtester.run()` with SPY benchmark counts. See `INCIDENT_REPORT.md`.
+Why not hourly fade: tight $0.30 SL → 1,600 shares on $500 risk → $75 fee (18% of risk) → 2,700 trades → -$240k. Only the formal `Backtester.run()` with SPY benchmark counts. See [`INCIDENT_REPORT.md`](INCIDENT_REPORT.md).
 
 ## Reproduce
 
@@ -113,10 +123,11 @@ python3 scripts/run_model_backtest.py --or-minutes 5 --target-r 2.0 --min-rvol 1
 
 ## References
 
-- Zarattini, Aziz, Barbon 2024 SSRN 24-97 — 5m OR, 1,000 stocks, Sharpe 2.40
-- Valkyrie ORB `STRATEGY.md` — 15m OR, seq+color, RVOL+phi, bracket `high±tick`
-- ORBPLUS — retrace 50% mean +0.0538R vs instant -0.0082R (WR 3.8% → removed)
-- [`SHINGAN_Hybrid_ORB_Paper.md`](SHINGAN_Hybrid_ORB_Paper.md)
+- Zarattini, C., Aziz, A., Barbon, A. 2024 — *Can Day Trading Really Be Profitable?* and *Beat the Market: An Effective Intraday Momentum Strategy for SPY.* Swiss Finance Institute Research Paper No. 24-97. SSRN [4824172](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4824172) and [4416622](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4416622) — 5m OR, 1,000 stocks, Sharpe 2.40
+- Valkyrie ORB 2026 — [Strategy Specification](https://github.com/LNSTT369/valkyrie_orb/blob/main/STRATEGY.md) · [Live Executor](https://github.com/LNSTT369/valkyrie_orb/blob/main/strategies/live_orb_executor.py) · [Quant Audit](https://github.com/LNSTT369/valkyrie_orb/blob/main/QUANT_AUDIT_REPORT.md) — 15m OR, seq+color lockout, RVOL+phi
+- ORBPLUS 2026 — [`ORBPLUS_BACKTEST_RESULTS.md`](https://github.com/LNSTT369/valkyrie_orb/blob/main/ORBPLUS_BACKTEST_RESULTS.md) — retrace 50% mean +0.0538R vs instant -0.0082R (WR 3.8% → removed in ultra `models/hybrid_orb.py:5`)
+- Shingan 2026 — [`SHINGAN_Hybrid_ORB_Paper.md`](SHINGAN_Hybrid_ORB_Paper.md) · [`SHINGAN_Hybrid_ORB_Paper.pdf`](SHINGAN_Hybrid_ORB_Paper.pdf) · [`SHINGAN_ArXiv_Paper.pdf`](SHINGAN_ArXiv_Paper.pdf) — full 44-ticker WFO 2021-2025
+- [`INCIDENT_REPORT.md`](INCIDENT_REPORT.md) · [`reports/24_hour_cycle_findings.md`](reports/24_hour_cycle_findings.md) · [`reports/alpha_portfolio_study.md`](reports/alpha_portfolio_study.md) — hourly fade audit, zero-beta portfolio
 
 ---
 
