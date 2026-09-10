@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.DS_Store
+data/
+*.db
+*.csv
+assets/*.png
+!assets/*.svg
+venv/
+.env
+.venv
