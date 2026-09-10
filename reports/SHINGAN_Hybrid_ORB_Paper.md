@@ -12,7 +12,7 @@
 
 ## Abstract
 
-We present Shingan, a hybrid intraday Opening Range Breakout (ORB) strategy that unifies three independently documented edges: Zarattini et al. (2024) 5-minute abnormal-volume momentum, Valkyrie ORB 15-minute volatility normalization (RVOL and OR/ATR phi), and ORBPLUS retracement execution. Tested on a 44-ticker liquid US universe (2018-2026, 5-minute bars, 1% fixed-fractional risk, $0.005/share commission, 0.01% slippage, Top-5 daily selection by RVOL), Shingan delivers a 5-year concatenated out-of-sample Sharpe of **1.21** on 1,262 trades (PF 1.25, +108.7% total, MaxDD 16.4%) from 2021-2025. On identical data, costs, and Top-K portfolio rules, it outperforms Valkyrie 15m (Sharpe 0.80, PF 1.17, +101.9%) and Zarattini naive 5m without filters (Sharpe 0.37, PF 1.04, +220.4% but DD 60.1%). Year-by-year, Shingan is the only variant profitable in the 2022 bear market (+7.9% vs naive -4.2%) and shows the highest Sharpe in 3 of 5 years. We document why the pure hourly liquidity fade (hourly high/low mean reversion, 4am-6pm) yields -24% to -99% across all hours and why the hybrid's two filters (RVOL >=1.5 and phi in [0.6, 2.0]) are necessary and sufficient. The strategy is implemented as `HybridORBModel` in `hourly-liquidity-lab` with a 44-symbol open-source backtester.
+We present Shingan, a hybrid intraday Opening Range Breakout (ORB) strategy that unifies three independently documented edges: Zarattini et al. (2024) 5-minute abnormal-volume momentum, Valkyrie ORB 15-minute volatility normalization (RVOL and OR/ATR phi), and ORBPLUS retracement execution. Tested on a 44-ticker liquid US universe (2018-2026, 5-minute bars, 1% fixed-fractional risk, $0.005/share commission, 0.01% slippage, Top-5 daily selection by RVOL), Shingan delivers a 5-year concatenated out-of-sample Sharpe of **1.21** on 1,262 trades (PF 1.25, +108.7% total, MaxDD 16.4%) from 2021-2025. On identical data, costs, and Top-K portfolio rules, it outperforms Valkyrie 15m (Sharpe 0.80, PF 1.17, +101.9%) and Zarattini naive 5m without filters (Sharpe 0.37, PF 1.04, +220.4% but DD 60.1%). Year-by-year, Shingan is the only variant profitable in the 2022 bear market (+7.9% vs naive -4.2%) and shows the highest Sharpe in 3 of 5 years. We document why the pure hourly liquidity fade (hourly high/low mean reversion, 4am-6pm) yields -24% to -99% across all hours and why the hybrid's two filters (RVOL >=1.5 and phi in [0.6, 2.0]) are necessary and sufficient. The strategy is implemented as `HybridORBModel` in `shingan with a 44-symbol open-source backtester.
 
 **Keywords:** Day Trading, Opening Range Breakout, Momentum, Relative Volume, Volatility Normalization, Walk-Forward, Market Microstructure
 
@@ -22,7 +22,7 @@ We present Shingan, a hybrid intraday Opening Range Breakout (ORB) strategy that
 
 ## 1. Introduction
 
-The opening 30 minutes concentrate 35% of daily volume and most overnight information asymmetry (Brock and Kleidon, 1992). Two competing hypotheses exploit it: (i) liquidity fade — price sweeps the opening range then reverts, and (ii) momentum breakout — price escaping the range continues. Our prior lab `hourly-liquidity-lab` tested (i) as an hourly liquidity sweep fade (previous hour high/low) across 24 hours (2011-2026, 5m bars, multi-target scale-out). Net of market-hours filtering (09:30-16:00) and $0.005/share costs, every hour loses 24% to 99% with Sharpe -0.29 to -2.39, despite 63-69% win rates, because average loss is 1.7-2.2x average win (PF 0.94).
+The opening 30 minutes concentrate 35% of daily volume and most overnight information asymmetry (Brock and Kleidon, 1992). Two competing hypotheses exploit it: (i) liquidity fade — price sweeps the opening range then reverts, and (ii) momentum breakout — price escaping the range continues. Our prior lab `shingan` (formerly hourly-liquidity-lab) tested (i) as an hourly liquidity sweep fade (previous hour high/low) across 24 hours (2011-2026, 5m bars, multi-target scale-out). Net of market-hours filtering (09:30-16:00) and $0.005/share costs, every hour loses 24% to 99% with Sharpe -0.29 to -2.39, despite 63-69% win rates, because average loss is 1.7-2.2x average win (PF 0.94).
 
 This paper tests (ii) and shows that the same data *does* contain positive expectancy when the ORB is formulated as a breakout with cross-sectional selection, as documented by Zarattini, Aziz, and Barbon (2024) on 1,000 stocks (Sharpe 2.40 vs SPY 0.84) and by Valkyrie ORB with RVOL/phi on 12 tickers (WFO Sharpe 0.98, PF 1.17). We ask: can a hybrid that takes Zarattini's 5-minute window, Valkyrie's RVOL and phi, and ORBPLUS's retracement execution beat both parents on a common 44-ticker universe with identical friction?
 
@@ -115,7 +115,7 @@ Code to reproduce:
 ```bash
 pip install -r requirements.txt
 python3 scripts/run_model_backtest.py --model hybrid --or-minutes 5 --target-r 2.0 --min-rvol 1.5 --phi-min 0.6 --phi-max 2.0 --top-k 5 --start_year 2021 --end_year 2025
-python3 scripts/run_hourly_scan.py --model hybrid --or-minutes 5,15 --target-r 1.5,2.0,3.0 --min-rvol 1.2,1.5,2.0 --top-k 5 --start_year 2021 --end_year 2025  # heatmap
+python3 scripts/run_model_backtest.py --heatmap --or-minutes 5,15 --target-r 1.5,2.0,3.0 --min-rvol 1.2,1.5,2.0 --top-k 5 --start_year 2021 --end_year 2025  # heatmap
 ```
 
 ---
@@ -210,11 +210,11 @@ Markowitz: SPY buy-and-hold Sharpe ~0.59 + hybrid 1.21 at corr 0.05 => `Sharpe_c
 
 ## 10. Conclusion
 
-Shingan hybrid is not a new indicator — it is a disciplined union of three known, weak edges that are each insufficient alone: Zarattini's 5m abnormal-volume window, Valkyrie's RVOL+phi+sequence, and ORBPLUS's tight breakout stop. Alone, SPY ORB is -95% (`ORB BACKTEST`), hourly fade is -24% to -99% (`hourly-liquidity-lab`), naive 5m is Sharpe 0.37 with 60% DD. Together filtered and ranked Top-5, the same 44 names yield Sharpe **1.21**, PF **1.25**, +107% in 5 years with 16.8% DD — **+51% Sharpe over Valkyrie 15m and +227% over Zarattini naive on identical data and costs**.
+Shingan hybrid is not a new indicator — it is a disciplined union of three known, weak edges that are each insufficient alone: Zarattini's 5m abnormal-volume window, Valkyrie's RVOL+phi+sequence, and ORBPLUS's tight breakout stop. Alone, SPY ORB is -95% (`ORB BACKTEST`), hourly fade is -24% to -99% (archived `models/legacy/`), naive 5m is Sharpe 0.37 with 60% DD. Together filtered and ranked Top-5, the same 44 names yield Sharpe **1.21**, PF **1.25**, +107% in 5 years with 16.8% DD — **+51% Sharpe over Valkyrie 15m and +227% over Zarattini naive on identical data and costs**.
 
-The lab is therefore flipped: `hourly-liquidity-lab` default is now `HybridORBModel` (`or_minutes=5, min_rvol=1.5, phi [0.6,2.0], target_r=2.0, Top5`) `scripts/run_model_backtest.py:12`, hourly fade is retained as `scaleout` for legacy audit. The next heatmap is no longer hourly (which has no alpha) but **OR (5/15/30) x Target (1.5/2/3R) x RVOL (1.2/1.5/2.0)** on the 44-ticker portfolio.
+The lab is therefore flipped: `shingan` default is now `HybridORBModel` (`or_minutes=5, min_rvol=1.5, phi [0.6,2.0], target_r=2.0, Top5`) `scripts/run_model_backtest.py:12`, hourly fade is retained as `scaleout` for legacy audit. The next heatmap is no longer hourly (which has no alpha) but **OR (5/15/30) x Target (1.5/2/3R) x RVOL (1.2/1.5/2.0)** on the 44-ticker portfolio.
 
-*Reproducibility:* `git clone hourly-liquidity-lab && pip install -r requirements.txt && python3 scripts/run_model_backtest.py --model hybrid --or-minutes 5 --target-r 2.0 --min-rvol 1.5 --start_year 2021 --end_year 2025` yields the +108.7% primary cell. Full heatmap: `python3 scripts/run_hourly_scan.py --model hybrid --or-minutes 5,15 --target-r 1.5,2.0,3.0 --min-rvol 1.2,1.5,2.0 --top-k 5 --start_year 2021 --end_year 2025`.
+*Reproducibility:* `git clone https://github.com/LNSTT369/shingan.git && pip install -r requirements.txt && python3 scripts/run_model_backtest.py --model hybrid --or-minutes 5 --target-r 2.0 --min-rvol 1.5 --start_year 2021 --end_year 2025` yields the +108.7% primary cell. Full heatmap: `python3 scripts/run_model_backtest.py --heatmap --or-minutes 5,15 --target-r 1.5,2.0,3.0 --min-rvol 1.2,1.5,2.0 --top-k 5 --start_year 2021 --end_year 2025`.
 
 ---
 
@@ -241,9 +241,9 @@ AAPL, ADBE, AMAT, AMD, AMGN, AMZN, ASML, AVGO, BKNG, CAT, CDNS, COIN, COST, FTNT
 
 ## Appendix C — Audit Logs
 
-* `hourly-liquidity-lab/reports/24_hour_cycle_findings.md` — hourly fade loses, market-hours filtered, 0 trades pre-market.
-* `hourly-liquidity-lab/reports/2026_backtest_report.md` — 2026 YTD fade -3.86% vs hybrid 2021-2025 +108%.
-* `hourly-liquidity-lab/reports/alpha_portfolio_study.md` — fade Sharpe -0.29 vs hybrid 1.21, combined Sharpe `sqrt(0.59^2+1.21^2)=1.35`.
+* reports/24_hour_cycle_findings.md` — hourly fade loses, market-hours filtered, 0 trades pre-market.
+* reports/2026_backtest_report.md` — 2026 YTD fade -3.86% vs hybrid 2021-2025 +108%.
+* reports/alpha_portfolio_study.md` — fade Sharpe -0.29 vs hybrid 1.21, combined Sharpe `sqrt(0.59^2+1.21^2)=1.35`.
 
 ---
 *Shingan — Clear-Eyed Lens. Perfection is achieved when there is nothing left to take away.*
