@@ -8,8 +8,8 @@ __pycache__/
 data/
 *.db
 *.csv
-assets/*.png
-!assets/*.svg
+!assets/*.png
+!assets/*.pdf
 venv/
 .env
 .venv
